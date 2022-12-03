@@ -16,5 +16,4 @@
  */
 void thermoReaderInit(void);
 
-
 #endif /* THERMOREADER_H */

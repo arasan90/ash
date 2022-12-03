@@ -5,11 +5,12 @@
 
 /*--------------------Includes--------------------*/
 #include "thermoReader.h"
+#include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "halGpio.h"
 #include "halLed.h"
-#include "esp_log.h"
+#include "heaterController.h"
 
 /*----------------Type definitions----------------*/
 /*--------------------Constants-------------------*/
@@ -69,11 +70,14 @@ void vTaskCode( void * pvParameters )
         {
             ESP_LOGI(LOG_NAME, "Heat requested: %s", 1 == heatRequest ? "yes" : "no");
             halLedSetValue(heatRequest);
-            if(!halGpioSetValue(14, heatRequest))
+            if(!heaterControllerSetValue(heatRequest))
             {
                 ESP_LOGW("main", "Error setting the GPIO14 output to %d", heatRequest);
             }
-            oldHeatRequest = heatRequest;
+            else
+            {
+                oldHeatRequest = heatRequest;
+            }
         }
         vTaskDelay(100 / portTICK_PERIOD_MS);
     }
