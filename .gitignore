@@ -1,0 +1,8 @@
+.pio
+.vscode/**
+build
+ash.code-workspace
+CMakeLists.txt
+sdkconfig.esp32dev
+C232HM.cfg
+platformio.ini
