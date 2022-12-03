@@ -8,6 +8,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "halGpio.h"
+#include "halLed.h"
 #include "esp_log.h"
 
 /*----------------Type definitions----------------*/
@@ -40,6 +41,19 @@ void thermoReaderInit(void)
         ESP_LOGE(LOG_NAME, "Error initializing GPIO19");
         while(1){}
     }
+    gpioConfig.gpioNumber = 14;
+    gpioConfig.gpioMode = halGpioMode_OUTPUT;
+    gpioConfig.pullDownEnabled = gpioConfig.pullUpEnabled = 0;
+    if (!halGpioInit(&gpioConfig))
+    {
+        ESP_LOGE("main", "%s", "Error initializing GPIO18");
+        while(1){}
+    }
+    if (!halLedInitialize(2))
+    {
+        ESP_LOGE("main", "%s", "Error initializing LED");
+        while(1){}
+    }
     xTaskCreate( vTaskCode, "ThermoTask", 2048, NULL, tskIDLE_PRIORITY, &xHandle );
     configASSERT( xHandle );
 }
@@ -54,6 +68,11 @@ void vTaskCode( void * pvParameters )
         if (heatRequest != oldHeatRequest)
         {
             ESP_LOGI(LOG_NAME, "Heat requested: %s", 1 == heatRequest ? "yes" : "no");
+            halLedSetValue(heatRequest);
+            if(!halGpioSetValue(14, heatRequest))
+            {
+                ESP_LOGW("main", "Error setting the GPIO14 output to %d", heatRequest);
+            }
             oldHeatRequest = heatRequest;
         }
         vTaskDelay(100 / portTICK_PERIOD_MS);
